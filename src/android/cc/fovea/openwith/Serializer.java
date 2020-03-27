@@ -81,7 +81,16 @@ class Serializer {
             final int clipItemCount = clipData.getItemCount();
             JSONObject[] items = new JSONObject[clipItemCount];
             for (int i = 0; i < clipItemCount; i++) {
-                items[i] = toJSONObject(contentResolver, clipData.getItemAt(i).getUri());
+             //TRA items[i] = toJSONObject(contentResolver, clipData.getItemAt(i).getUri());
+				 if (clipData.getItemAt(i).getUri() != null) {
+                    items[i] = toJSONObject(contentResolver, clipData.getItemAt(i).getUri());
+                } else if (clipData.getItemAt(i).getText() != null) {
+                    items[i] = toJSONObject(contentResolver, clipData.getItemAt(i).getText().toString());
+                } else if (clipData.getItemAt(i).getHtmlText() != null) {
+                    items[i] = toJSONObject(contentResolver, clipData.getItemAt(i).getHtmlText());
+                } else {
+                    items[i] = toJSONObject(contentResolver, clipData.getItemAt(i).toString());
+                }
             }
             return new JSONArray(items);
         }
@@ -129,30 +138,51 @@ class Serializer {
         items[0] = item;
         return new JSONArray(items);
     }
-
-    /** Convert an Uri to JSON object.
+   // TRA /** Convert an Uri to JSON object.
+     // *
+     // * Object will include:
+     // *    "type" of data;
+     // *    "uri" itself;
+     // *    "path" to the file, if applicable.
+     // *    "data" for the file.
+     // */
+    // public static JSONObject toJSONObject(
+            // final ContentResolver contentResolver,
+            // final Uri uri)
+            // throws JSONException {
+        // if (uri == null) {
+            // return null;
+        // }
+        // final JSONObject json = new JSONObject();
+        // final String type = contentResolver.getType(uri);
+        // json.put("type", type);
+        // json.put("uri", uri);
+        // json.put("path", getRealPathFromURI(contentResolver, uri));
+        // return json;
+    // }
+ /** Convert an String to JSON object.
      *
      * Object will include:
      *    "type" of data;
-     *    "uri" itself;
+     *    "text" itself;
      *    "path" to the file, if applicable.
      *    "data" for the file.
      */
     public static JSONObject toJSONObject(
             final ContentResolver contentResolver,
-            final Uri uri)
+            final String text)
             throws JSONException {
-        if (uri == null) {
+        if (text == null) {
             return null;
         }
         final JSONObject json = new JSONObject();
-        final String type = contentResolver.getType(uri);
-        json.put("type", type);
-        json.put("uri", uri);
-        json.put("path", getRealPathFromURI(contentResolver, uri));
+														 
+        json.put("type", "text/plain");
+        json.put("text", text);
+																   
         return json;
     }
-
+	
     /** Return data contained at a given Uri as Base64. Defaults to null. */
     public static String getDataFromURI(
             final ContentResolver contentResolver,
